@@ -1,0 +1,14 @@
+<?php
+
+try{
+
+    $pdo = new PDO('mysql:host=localhost;dbname=isagani_inventory','root','');
+
+}catch(PDOException $e){
+
+echo $e->getMessage();
+
+}
+
+
+?>
