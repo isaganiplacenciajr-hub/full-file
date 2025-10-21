@@ -101,78 +101,41 @@ include_once"header.php";
           </div>
         </div>
         <div class="row mb-4">
-          <div class="col-lg-12">
+          <div class="col-lg-4 col-12 mb-4">
             <div class="card shadow border-0">
-              <div class="card-header bg-primary text-white">
-                <h5 class="m-0">Stock Monitoring</h5>
+              <div class="card-header bg-info text-white">
+                <h5 class="m-0">Best-selling KG (All time)</h5>
               </div>
               <div class="card-body">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Size</th>
-                      <th>Stock Level</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    $stmt = $pdo->prepare("SELECT category, SUM(stock) as total_stock FROM tbl_product GROUP BY category");
-                    $stmt->execute();
-                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                      $stock = $row['total_stock'];
-                      $status = '';
-                      $color = '';
+                <?php
+                // Top-selling categories (kg sizes) by quantity sold
+                $stmt = $pdo->prepare("SELECT b.category, SUM(a.qty) AS total_qty FROM tbl_invoice_details a JOIN tbl_product b ON a.product_id=b.pid GROUP BY b.category ORDER BY total_qty DESC LIMIT 3");
+                $stmt->execute();
+                $tops = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                      if ($stock < 15) {
-                        $status = 'Low Stock (Re-stocking)';
-                        $color = 'text-danger';
-                      } elseif ($stock <= 20) {
-                        $status = 'Medium Stock';
-                        $color = 'text-warning';
-                      } elseif ($stock <= 25) {
-                        $status = 'Sufficient Stock';
-                        $color = 'text-success';
-                      } elseif ($stock < 40) {
-                        $status = 'High Stock';
-                        $color = 'text-success';
-                      } else {
-                        $status = 'Very High Stock';
-                        $color = 'text-primary';
-                      }
-
-                      echo "<tr>";
-                      echo "<td>{$row['category']}</td>";
-                      echo "<td>{$stock}</td>";
-                      echo "<td class='$color'>{$status}</td>";
-                      echo "</tr>";
+                if (!$tops) {
+                  echo '<p>No sales data yet.</p>';
+                } else {
+                  $first = $tops[0];
+                  echo "<div style=\"font-size:1.4rem;font-weight:700;\">" . htmlspecialchars($first['category']) . "</div>";
+                  echo "<div style=\"font-size:1.1rem;color:#666;margin-bottom:8px;\">Sold: " . (int)$first['total_qty'] . "</div>";
+                  if (count($tops) > 1) {
+                    echo '<hr><div style="font-weight:600;">Top 3</div><ul class="pl-3">';
+                    foreach ($tops as $t) {
+                      echo '<li>' . htmlspecialchars($t['category']) . ' — ' . (int)$t['total_qty'] . ' pcs</li>';
                     }
-                    ?>
-                  </tbody>
-                </table>
-                <div class="mt-3">
-                  <h6>Legend:</h6>
-                  <ul>
-                    <li><span class="text-danger">Red</span>: Below 15 (Low Stock)</li>
-                    <li><span class="text-warning">Yellow</span>: 16 to 20 (Medium Stock)</li>
-                    <li><span class="text-success">Green</span>: 21 to 25 (Sufficient Stock)</li>
-                    <li><span class="text-primary">Blue</span>: 26 up (High Stock)</li>
-                  </ul>
-                </div>
+                    echo '</ul>';
+                  }
+                }
+                ?>
               </div>
             </div>
           </div>
-        </div>
-      </div><!-- /.container-fluid -->
-    </div>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
- 
- 
+         
+
+
  <?php
 
-include_once"footer.php";
 
 
 ?>
